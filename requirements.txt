@@ -1,0 +1,7 @@
+pydantic==2.10.1
+GitPython==3.1.43
+aiohttp==3.11.8
+aiofiles==24.1.0
+beautifulsoup4==4.12.3
+python-dateutil==2.9.0.post0
+asyncio-atexit==1.0.1

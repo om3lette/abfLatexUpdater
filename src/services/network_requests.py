@@ -1,7 +1,5 @@
 from pathlib import Path
 
-import requests
-
 from src.constants import ABF_UPLOAD_URI, PackageTypes, MIRROR_BASE_URL
 from src.schemas import FileMetadataSchema
 from src.services.directory_structure import sources_save_path

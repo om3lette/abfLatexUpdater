@@ -1,7 +1,6 @@
 import json
 
 import aiohttp
-import requests
 import logging
 
 from bs4 import BeautifulSoup, PageElement

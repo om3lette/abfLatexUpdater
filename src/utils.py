@@ -1,5 +1,4 @@
 import fileinput
-import requests
 import logging
 import sys
 
@@ -74,13 +73,6 @@ def iter_file(file_path: Path, action: Callable, remove_single_quotes: bool = Tr
         sys.stdout.write(new_content)
         last_line = new_content
     f.close()
-
-
-def download_package_data(resource_name: str, save_path: Path) -> None:
-    response = requests.get(MIRROR_BASE_URL + resource_name, allow_redirects=True)
-    check_for_exit_condition(not response.ok, message=f"Failed to download file with http code {response.status_code}")
-    with open(save_path, 'wb') as f:
-        f.write(response.content)
 
 
 def is_update_needed(old_package: SpecFileDataSchema, proposed_update: SpecFileDataSchema) -> bool:

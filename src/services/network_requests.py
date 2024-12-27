@@ -1,15 +1,17 @@
-from pathlib import Path
-
-from src.constants import ABF_UPLOAD_URI, PackageTypes, MIRROR_BASE_URL
-from src.schemas import FileMetadataSchema
-from src.services.directory_structure import sources_save_path
-from src.utils import check_for_exit_condition
 import asyncio
 import aiohttp
 import aiofiles
 import logging
 
-logger = logging.getLogger("Network")
+from pathlib import Path
+
+from src.constants import ABF_UPLOAD_URI, PackageTypes, MIRROR_BASE_URL
+from src.schemas.package_data import FileMetadataSchema
+from src.schemas.user_data import LoginDataSchema
+from src.services.directory_structure import sources_save_path
+from src.utils import check_for_exit_condition, create_logger
+
+logger = create_logger("Network", logging.INFO)
 
 
 class RequestsHandler:
@@ -57,16 +59,16 @@ class RequestsHandler:
             check_for_exit_condition(True, message="No internet connection. Aborting...")
         return saved_paths
 
-    async def download_and_upload_files(self, username: str, password: str, package_short_name: str, data_path: Path, sources: list[FileMetadataSchema]) -> dict[PackageTypes, str]:
+    async def download_and_upload_files(self, abf_credentials: LoginDataSchema, package_short_name: str, data_path: Path, sources: list[FileMetadataSchema]) -> dict[PackageTypes, str]:
         logger.info(f"Downloading {len(sources)} source files")
         saved_paths: list[tuple[Path, PackageTypes]] = await self.download_files(package_short_name, data_path, sources)
         logger.info("Finished Downloading")
         logger.info(f"Uploading {len(sources)} source files to filestore")
-        file_hashes: dict[PackageTypes, str] = await self.upload_to_filestore(username, password, saved_paths)
+        file_hashes: dict[PackageTypes, str] = await self.upload_to_filestore(abf_credentials, saved_paths)
         logger.info("Source files uploaded")
         return file_hashes
 
-    async def upload_to_filestore(self, username: str, password: str, files_data: list[tuple[Path, PackageTypes]]) -> dict[PackageTypes, str]:
+    async def upload_to_filestore(self, abf_credentials: LoginDataSchema, files_data: list[tuple[Path, PackageTypes]]) -> dict[PackageTypes, str]:
         opened_files: list = []
         file_hashes: dict[PackageTypes, str] = {}
 
@@ -77,7 +79,7 @@ class RequestsHandler:
             opened_files.append(open(file_data[0], 'rb'))
         try:
             tasks = [
-                asyncio.create_task(self.__file_upload_task(username, password, file, file_hashes, files_data[i][1]))
+                asyncio.create_task(self.__file_upload_task(abf_credentials.email, abf_credentials.password, file, file_hashes, files_data[i][1]))
                 for i, file in enumerate(opened_files)
             ]
             await asyncio.gather(*tasks)

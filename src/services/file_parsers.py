@@ -1,10 +1,10 @@
-from src.schemas import SpecFileDataSchema, PackageTypes, IncludedFileSchema
-from src.utils import iter_file
-from pathlib import Path
-
 import logging
 
-logger = logging.getLogger("FileParser")
+from src.schemas.package_data import SpecFileDataSchema, PackageTypes, IncludedFileSchema
+from src.utils import iter_file, check_for_exit_condition, create_logger
+from pathlib import Path
+
+logger = create_logger("FileParser", logging.INFO)
 
 
 def parse_spec_file(spec_file_path: Path) -> SpecFileDataSchema:
@@ -44,6 +44,7 @@ def update_spec_file(spec_file_path: Path, old_data: SpecFileDataSchema, new_dat
             return ''
         return current_line
     iter_file(spec_file_path, executor)
+    logger.info("Updated spec file")
 
 
 def update_hash_file(hash_file_path: Path, file_hashes: dict[PackageTypes, str]) -> int:
@@ -69,4 +70,6 @@ def update_hash_file(hash_file_path: Path, file_hashes: dict[PackageTypes, str])
             return line_base + f"{file_hashes[PackageTypes.SOURCE]}\n"
         return line_base + f"{file_hashes[PackageTypes.MAIN]}\n"
     iter_file(hash_file_path, executor)
+    check_for_exit_condition(updates_counter, lambda x: x != len(file_hashes),"Not all of the provided hashes were used")
+    logger.info("Updated hashes in .abf.yml")
     return updates_counter

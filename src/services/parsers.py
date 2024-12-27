@@ -6,13 +6,13 @@ import logging
 from bs4 import BeautifulSoup, PageElement
 
 from src.services.network_requests import RequestsHandler
-from src.utils import check_for_exit_condition
+from src.utils import check_for_exit_condition, create_logger
 from src.constants import MIRROR_BASE_URL, PackageTypes, FILES_CACHE_PATH, ARCHITECTURES_SPECIFIC_PREFIXES
-from src.schemas import SpecFileDataSchema, AvailableSourcesSchema, PackageMetadataSchema, FileMetadataSchema
+from src.schemas.package_data import SpecFileDataSchema, AvailableSourcesSchema, PackageMetadataSchema, FileMetadataSchema
 from dateutil.parser import parse
 from datetime import datetime
 
-logger = logging.getLogger('Parser')
+logger = create_logger('Parser', logging.INFO)
 
 
 async def get_soup(request_handler: RequestsHandler, url: str) -> BeautifulSoup:
@@ -36,7 +36,7 @@ async def parse_package_data(request_handler: RequestsHandler, package_data: Spe
     return new_pacakge_data
 
 
-async def parse_mirror_for_files(requests_handler: RequestsHandler) -> AvailableSourcesSchema:
+async def parse_mirror(requests_handler: RequestsHandler) -> AvailableSourcesSchema:
     logger.info("Acquiring available source files list")
     if FILES_CACHE_PATH.is_file():
         logger.info("Found cached data")

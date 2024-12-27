@@ -4,12 +4,12 @@ import sys
 import os
 
 TMP_FOLDER_NAME: str = "rpm_package_upgrade_tmp"
-
 WORK_DIR_PATH: Path = (
     Path.joinpath(Path(os.path.dirname(sys.executable)), TMP_FOLDER_NAME))\
     if getattr(sys, 'frozen', False)\
     else Path.joinpath(Path(__file__).resolve().parents[1], TMP_FOLDER_NAME
 )
+CRASH_LOG_PATH: Path = Path.joinpath(WORK_DIR_PATH, 'crash.log')
 
 FILES_CACHE_PATH: Path = Path.joinpath(WORK_DIR_PATH, 'mirror_cache.json')
 
@@ -29,9 +29,12 @@ BOOLEAN_INPUT_ANSWERS: list[str] = ACCEPT_VALUES + DECLINE_VALUES
 class ExitStatus(IntEnum):
     ERROR = 1
     EARLY_RETURN = 2
+    NOT_IMPLEMENTED = 3
 
 
 class PackageTypes(IntEnum):
     MAIN = 1
     SOURCE = 2
     DOC = 3
+
+RESERVED_TASK_TYPES: int = 1

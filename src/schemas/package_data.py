@@ -27,6 +27,9 @@ class SpecFileDataSchema(BaseModel):
             return '-'.join(self.name.split('-', 1)[1:])
         return self.name
 
+    def __str__(self) -> str:
+        return f"Name: {self.name} Version: {self.version} Release: {self.release}"
+
 
 class FileMetadataSchema(BaseModel):
     version: str = Field(default='')
@@ -36,7 +39,7 @@ class FileMetadataSchema(BaseModel):
 
 
 class PackageMetadataSchema(BaseModel):
-    version_specific: list[FileMetadataSchema] = Field(default_factory=list)
+    version_specific: list[FileMetadataSchema] = Field(default_factory=lambda: [])
     general: list[FileMetadataSchema] = Field(default_factory=list)
 
     class Config:
@@ -46,6 +49,9 @@ class PackageMetadataSchema(BaseModel):
 class AvailableSourcesSchema(BaseModel):
     update_time: datetime = Field(default=datetime.now())
     files: DefaultDict[str, Annotated[PackageMetadataSchema, Field(default_factory=PackageMetadataSchema)]] = defaultdict(PackageMetadataSchema)
+
+    def get_repo_related(self, repo_name: str) -> list[FileMetadataSchema]:
+        return self.files[repo_name].general
 
     class Config:
         arbitrary_types_allowed = True

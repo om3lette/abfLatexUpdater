@@ -41,5 +41,8 @@ def commit_and_push(repo: git.Repo, files_to_commit: list[Path], old_package_dat
     repo.index.commit(f'Updated package from version "{old_package_data.version}" to "{new_package_data.version}"')
     logger.info("Added files to commit")
     origin = repo.remote('origin')
-    origin.push()
+    try:
+        origin.push()
+    except git.CommandError as e:
+        check_for_exit_condition(True, message="Failed to push to the remote repo", error=str(e))
     logger.info("Pushed to the remote origin")

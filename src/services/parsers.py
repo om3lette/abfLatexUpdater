@@ -1,12 +1,11 @@
 import json
-
 import aiohttp
 import logging
 
 from bs4 import BeautifulSoup, PageElement
 
 from src.services.network_requests import RequestsHandler
-from src.utils import check_for_exit_condition, create_logger
+from src.utils import check_for_exit_condition, create_logger, is_cache_valid
 from src.constants import MIRROR_BASE_URL, PackageTypes, FILES_CACHE_PATH, ARCHITECTURES_SPECIFIC_PREFIXES
 from src.schemas.package_data import SpecFileDataSchema, AvailableSourcesSchema, PackageMetadataSchema, FileMetadataSchema
 from dateutil.parser import parse
@@ -35,13 +34,16 @@ async def parse_package_data(request_handler: RequestsHandler, package_data: Spe
             break
     return new_pacakge_data
 
-
-async def parse_mirror(requests_handler: RequestsHandler) -> AvailableSourcesSchema:
+async def parse_mirror(requests_handler: RequestsHandler, force_update: bool = False) -> AvailableSourcesSchema:
     logger.info("Acquiring available source files list")
-    if FILES_CACHE_PATH.is_file():
-        logger.info("Found cached data")
+    if is_cache_valid(FILES_CACHE_PATH) or force_update:
+        logger.info("Found valid cached data")
         with open(FILES_CACHE_PATH, 'r') as f:
             return AvailableSourcesSchema.model_validate_json(f.read())
+    if force_update:
+        logger.info("Force update requested. Ignoring cache")
+    elif FILES_CACHE_PATH.is_file():
+        logger.info("Found outdated cache, refetching...")
     soup: BeautifulSoup = await get_soup(requests_handler, MIRROR_BASE_URL)
     packages_data: list[PageElement] = list(soup.find('pre').children)[2:]
     packages_data_parsed: AvailableSourcesSchema = AvailableSourcesSchema()

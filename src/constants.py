@@ -1,3 +1,4 @@
+from datetime import timedelta
 from pathlib import Path
 from enum import IntEnum
 import sys
@@ -19,6 +20,7 @@ ARCHITECTURES_SPECIFIC_PREFIXES: list[str] = ["armhf", "aarch64", "i386", "unive
 TARBALL_SUFFIX: str = "tar.xz"
 
 MIRROR_BASE_URL: str = "https://mirror.truenetwork.ru/CTAN/systems/texlive/tlnet/archive/"
+CACHE_LIFESPAN: timedelta = timedelta(days=7)
 ABF_UPLOAD_URI: str = "http://file-store.rosalinux.ru/api/v1/upload"
 
 DECLINE_VALUES: list[str] = ['n', 'no']

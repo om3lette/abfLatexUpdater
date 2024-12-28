@@ -1,5 +1,6 @@
 from src.constants import PackageTypes
 from src.schemas.package_data import AvailableSourcesSchema
+
 from src.utils import *
 from src.services.git import *
 from src.actions.actions import *
@@ -12,12 +13,13 @@ from src.services.network_requests import RequestsHandler
 class TaskHandler:
     def __init__(self, user_data):
         self.user_data: UserDataSchema = user_data
+        self.requests_handler: RequestsHandler = create_requests_handler()
         self.__task_type_to_func = {
             TaskType.UPDATE_PACKAGE: self.__update_package,
             TaskType.CREATE_PACKAGE: None,
-            TaskType.PARSE_MIRROR: None,
+            TaskType.PARSE_MIRROR: self.__parse_mirror,
             TaskType.GET_PACKAGE_FILES: None,
-            TaskType.INIT_DIRECTORY_STRUCTURE: None,
+            TaskType.CLONE_REMOTE_REPO: self.__clone_remote_repo,
             TaskType.EXIT: None
         }
 
@@ -28,21 +30,26 @@ class TaskHandler:
         await executor(data)
         return 0
 
+    @staticmethod
+    async def __clone_remote_repo(data: CloneRemoteRepoTaskDataSchema):
+        prepare_repo(data.repo_url)
+
+    async def __parse_mirror(self, data: None):
+        await parse_mirror(self.requests_handler, True)
+
     async def __update_package(self, data: UpdatePackageTaskDataSchema):
         repo_data: RepoDataSchema = prepare_repo(data.repo_url)
         spec_file_path, hash_file_path = verify_file_presence(repo_data.path)
 
-        requests_handler: RequestsHandler = create_requests_handler()
+        old_package_data, new_package_data = await get_package_data(self.requests_handler, spec_file_path)
 
-        old_package_data, new_package_data = await get_package_data(requests_handler, spec_file_path)
-
-        available_source_files: AvailableSourcesSchema = await parse_mirror(requests_handler)
+        available_source_files: AvailableSourcesSchema = await parse_mirror(self.requests_handler)
         check_for_exit_condition(available_source_files.get_repo_related(repo_data.name), lambda x: len(x) == 0,
                                  f"Sources not found for {repo_data.name}")
 
         update_spec_file(spec_file_path, old_package_data, new_package_data, data.delete_comments)
 
-        file_hashes: dict[PackageTypes, str] = await requests_handler.download_and_upload_files(
+        file_hashes: dict[PackageTypes, str] = await self.requests_handler.download_and_upload_files(
             self.user_data.abf_credentials,
             new_package_data.short_name,
             repo_data.data_path,

@@ -2,11 +2,13 @@ import fileinput
 import logging
 import sys
 
+from datetime import datetime
 from typing import Callable
 from pathlib import Path
 from sys import exit
 
-from .constants import ExitStatus, BOOLEAN_INPUT_ANSWERS, ACCEPT_VALUES, CRASH_LOG_PATH
+
+from .constants import ExitStatus, BOOLEAN_INPUT_ANSWERS, ACCEPT_VALUES, CRASH_LOG_PATH, CACHE_LIFESPAN
 from .schemas.package_data import SpecFileDataSchema
 
 
@@ -99,3 +101,8 @@ def is_update_needed(old_package: SpecFileDataSchema, proposed_update: SpecFileD
     if old_package.release != proposed_update.release:
         return old_package.release < proposed_update.release
     return False
+
+def is_cache_valid(cache_path: Path) -> bool:
+    if not cache_path.is_file():
+        return False
+    return (datetime.fromtimestamp(cache_path.stat().st_mtime) + CACHE_LIFESPAN) > datetime.today()

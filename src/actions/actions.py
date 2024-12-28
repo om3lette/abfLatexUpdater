@@ -9,7 +9,7 @@ from src.schemas.package_data import SpecFileDataSchema
 from src.schemas.repo import RepoDataSchema
 
 from src.schemas.user_data import UserDataSchema, LoginDataSchema
-from src.schemas.tasks import TaskType, UpdatePackageTaskDataSchema
+from src.schemas.tasks import TaskType, UpdatePackageTaskDataSchema, CloneRemoteRepoTaskDataSchema
 from src.services.directory_structure import create_work_dir
 from src.services.file_parsers import parse_spec_file
 from src.services.git import clone_repo, checkout_latest
@@ -41,10 +41,12 @@ def get_task() -> tuple[TaskType, any]:
         selected_task = TaskType.CREATE_PACKAGE
     elif task_number == 3:
         selected_task = TaskType.PARSE_MIRROR
+        data = None
     elif task_number == 4:
         selected_task = TaskType.GET_PACKAGE_FILES
     elif task_number == 5:
-        selected_task = TaskType.INIT_DIRECTORY_STRUCTURE
+        selected_task = TaskType.CLONE_REMOTE_REPO
+        data = CloneRemoteRepoTaskDataSchema.from_cli()
     elif task_number == 6:
         selected_task = TaskType.EXIT
         data = None

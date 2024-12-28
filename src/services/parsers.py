@@ -36,8 +36,10 @@ async def parse_package_data(request_handler: RequestsHandler, package_data: Spe
 
 async def parse_mirror(requests_handler: RequestsHandler, force_update: bool = False) -> AvailableSourcesSchema:
     logger.info("Acquiring available source files list")
-    if is_cache_valid(FILES_CACHE_PATH) or force_update:
+    if is_cache_valid(FILES_CACHE_PATH) and not force_update:
         logger.info("Found valid cached data")
+        if not FILES_CACHE_PATH.is_file():
+            FILES_CACHE_PATH.touch()
         with open(FILES_CACHE_PATH, 'r') as f:
             return AvailableSourcesSchema.model_validate_json(f.read())
     if force_update:

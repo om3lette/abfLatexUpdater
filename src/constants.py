@@ -11,7 +11,6 @@ WORK_DIR_PATH: Path = (
     else Path.joinpath(Path(__file__).resolve().parents[1], TMP_FOLDER_NAME
 )
 CRASH_LOG_PATH: Path = Path.joinpath(WORK_DIR_PATH, 'crash.log')
-
 FILES_CACHE_PATH: Path = Path.joinpath(WORK_DIR_PATH, 'mirror_cache.json')
 
 SPEC_FILE_SUFFIXES: list[str] = ["spec"]

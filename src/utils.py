@@ -1,5 +1,6 @@
 import fileinput
 import logging
+import os
 import sys
 
 from datetime import datetime
@@ -14,7 +15,9 @@ from .schemas.package_data import SpecFileDataSchema
 
 def create_logger(name: str, level, file_path: Path | None = None) -> logging.Logger:
     formatter = logging.Formatter('%(asctime)s | %(name)s | %(levelname)s | %(message)s', datefmt='%H:%M:%S')
-
+    if file_path and not file_path.is_file():
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        file_path.touch()
     output_handler = logging.FileHandler(file_path) if file_path is not None else logging.StreamHandler(sys.stdout)
     output_handler.setLevel(level)
     output_handler.setFormatter(formatter)
@@ -23,6 +26,7 @@ def create_logger(name: str, level, file_path: Path | None = None) -> logging.Lo
     logger.setLevel(level)
     logger.addHandler(output_handler)
 
+    logger.propagate = False
     return logger
 
 error_logger = create_logger('Crash', logging.CRITICAL, CRASH_LOG_PATH)
@@ -31,7 +35,7 @@ def handle_input(text: str, validator: Callable) -> str:
     data: str = input(text)
     while not validator(data):
         data: str = input(text)
-    return data
+    return data.strip()
 
 
 def handle_bool_input(text: str) -> bool:

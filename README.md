@@ -2,7 +2,7 @@
 - [x] Получение данных из .spec и .yaml/.yml файла с хэшами
 - [x] Получение обновленных данных о пакете с [ctan.org](https://ctan.org/)
 - [x] Получение данных о имеющихся в зеркале файлах.
-- [ ] Принудительное и автоматическое обновление локальных данных (mirror_cache.json)
+- [x] Принудительное и автоматическое обновление локальных данных (mirror_cache.json)
 - [x] Скачивание файлов с [зеркала](https://mirror.truenetwork.ru/CTAN/systems/texlive/tlnet/archive)
 - [x] Загрузка файлов на [filestore](https://file-store.rosalinux.ru/)
 - [x] Обновление хешей в abf.yaml и версии/эпохи/релиза в .spec

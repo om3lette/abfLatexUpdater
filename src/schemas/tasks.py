@@ -11,13 +11,13 @@ class TaskData(BaseModel):
     def from_cli(cls) -> Self:
         return
 
-class UpdatePackageDataSchema(TaskData):
+class UpdatePackageTaskDataSchema(TaskData):
     delete_comments: bool
     repo_url: str
 
     @classmethod
     def from_cli(cls) -> Self:
-        return UpdatePackageDataSchema(
+        return UpdatePackageTaskDataSchema(
             repo_url=handle_input("Type repo url to update: ", lambda x: x[-4:] == '.git' and not x.startswith('git')),
             delete_comments=handle_bool_input("Remove present comments y/n? ")
         )
